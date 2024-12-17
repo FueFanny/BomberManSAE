@@ -4,7 +4,7 @@ import random
 import math
 
 # ouverture de fenêtre
-L, H = 800, 800
+L, H = 600, 600
 g = ouvrirFenetre(L, H)
 
 # un mur (M)
@@ -16,7 +16,6 @@ g = ouvrirFenetre(L, H)
 # un upgrade (U)
 # une bombe (B)
 # une explosion (X)
-
 
 class Block:
     def __init__(self, x, y, c):
@@ -34,21 +33,34 @@ class Block:
         g.dessinerLigne(x * c, y * c, x * c + c, y * c + c, "black")
 
     def Mur(x, y, c):
-        g.dessinerRectangle(x * c, y * c, c, c, "red")
+        g.dessinerRectangle(x * c, y * c, c, c, "firebrick")
         g.dessinerLigne(x * c, y * c, x * c, y * c + c, "darkred")
         g.dessinerLigne(x * c, y * c, x * c + c, y * c, "darkred")
         g.dessinerLigne(x * c, y * c + c, x * c + c, y * c + c, "darkred")
         g.dessinerLigne(x * c + c, y * c, x * c + c, y * c + c, "darkred")
-        g.dessinerLigne(x * c + (c // 2), y * c, x * c + (c // 2), y * c + c, "darkred")
+        g.dessinerLigne(x * c + (c // 2), y * c+ (c // 3.5), x * c + (c // 2), y * c + (c // 2), "darkred")
+        g.dessinerLigne(x * c + (c // 2), y * c+ (c // 1.3), x * c + (c // 2), y * c + c, "darkred")
+        g.dessinerLigne(x * c + (c // 3.5), y * c, x * c + (c // 3.5), y * c + (c // 3.5), "darkred")
+        g.dessinerLigne(x * c + (c // 1.3), y * c, x * c + (c // 1.3), y * c + (c // 3.5), "darkred")
+        g.dessinerLigne(x * c + (c // 3.5), y * c+ (c // 2), x * c + (c // 3.5), y * c + (c // 1.3), "darkred")
+        g.dessinerLigne(x * c + (c // 1.3), y * c+ (c // 2), x * c + (c // 1.3), y * c + (c // 1.3), "darkred")
         g.dessinerLigne(x * c, y * c + (c // 2), x * c + c, y * c + (c // 2), "darkred")
+        g.dessinerLigne(x * c, y * c + (c // 3.5), x * c + c, y * c + (c // 3.5), "darkred")
+        g.dessinerLigne(x * c, y * c + (c // 1.3), x * c + c, y * c + (c // 1.3), "darkred") #in process of renovation
 
     def Sol(x, y, c):
-        g.dessinerRectangle(x * c, y * c, c, c, "bisque")
+        g.dessinerRectangle(x * c, y * c, c, c, "tan")
         g.dessinerLigne(x * c, y * c, x * c + c, y * c, "brown")
-        g.dessinerLigne(
-            x * c, y * c + (c // 1.5), x * c + c, y * c + (c // 1.5), "brown"
-        )
-        g.dessinerLigne(x * c, y * c + (c // 3), x * c + c, y * c + (c // 3), "brown")
+        g.dessinerLigne(x * c, y * c + (c // 2), x * c + c, y * c + (c // 2), "brown")
+        g.dessinerLigne(x * c, y * c + (c // 1.3), x * c + c, y * c + (c // 1.3), "brown")
+        g.dessinerLigne(x * c, y * c + (c // 3.5), x * c + c, y * c + (c // 3.5), "brown")
+
+    def Ethernet(x, y, c):
+        g.dessinerRectangle(x * c, y * c, c, c, "BlanchedAlmond")
+        g.dessinerLigne(x * c + (c // 3.5), y * c + (c // 3.5), x * c + (c // 3.5), y * c + (c // 1.3), "black")
+        g.dessinerLigne(x * c + (c // 1.3), y * c + (c // 3.5), x * c + (c // 1.3), y * c + (c // 1.3), "black")
+        g.dessinerLigne(x * c + (c // 3.5), y * c + (c // 3.5), x * c + (c // 1.3), y * c + (c // 3.5), "black")
+        g.dessinerLigne(x * c + (c // 3.5), y * c + (c // 1.3), x * c + (c // 1.3), y * c + (c // 1.3), "black")
 
 
 class Player:
@@ -56,12 +68,13 @@ class Player:
         self.x = x
         self.y = y
         self.size = size
+        self.health = 100
         self.lives = 3
         self.bombs = 1
-        self.bomb_range = 4
+        self.bomb_range = 1
         self.speed = 1
-        self.sprite = None
-        self.score = 0
+        self.sprite = None  # Pour stocker la référence du sprite actuel
+        self.score = 0  # Ajout du score
 
     def draw(self):
         # Efface l'ancien sprite si il existe
@@ -84,13 +97,11 @@ class Player:
         return False
 
     def take_damage(self, amount):
-        self.lives -= amount
-        if self.lives <= 0:
-            # Game over
-            g.afficherTexte("Game Over", 200, 200, "red", 32)
-            g.actualiser()
-            g.attendreClic()
-            g.fermerFenetre()
+        self.health -= amount
+        if self.health <= 0:
+            self.lives -= 1
+            if self.lives > 0:
+                self.health = 100
 
     def can_move(self, dx, dy, map_data):
         # Calcule la nouvelle position
@@ -112,23 +123,20 @@ def readmap1():
     players = []
     with open("map0.txt", "r") as file:
         map1 = file.readlines()
-    for col in range(0, len(map1) - 3):
-        mp = map1[col + 3].strip()
-        print(repr(mp))
+    for col in range(0, len(map1)-3):
+        mp = map1[col+3].strip()
         BI = len(mp)
         for lig in range(0, len(mp)):
             if mp[lig] == "C":
-                Block.Colonne(lig, col, L // BI)
+                Block.Colonne(lig, col, L//BI)
             elif mp[lig] == "M":
-                Block.Mur(lig, col, L // BI)
+                Block.Mur(lig, col, L//BI)
             elif mp[lig] == "E":
-                g.dessinerRectangle(
-                    lig * L // BI, col * L // BI, L // BI, L // BI, "DarkViolet"
-                )
+                Block.Ethernet(lig, col, L//BI)
             elif mp[lig] == " ":
-                Block.Sol(lig, col, L // BI)
+                Block.Sol(lig, col, L//BI)
             elif mp[lig] == "P":
-                player = Player(lig, col, L // BI)
+                player = Player(lig, col, L//BI)
                 players.append(player)
                 player.draw()
     return players, map1[3:]  # Retourne aussi les données de la carte
@@ -141,12 +149,10 @@ player = players[0]  # Le premier joueur
 # Boucle principale du jeu
 while True:
     # Efface l'ancien HUD avec un rectangle noir (fond)
-    g.dessinerRectangle(
-        0, 0, 400, 40, "black"
-    )  # largeur changée de 300 à 400 pour s'assurer que tout le texte est visible
+    g.dessinerRectangle(0, 0, 400, 40, "black")  # largeur changée de 300 à 400 pour s'assurer que tout le texte est visible
     # Affiche le nouveau HUD
     player.draw_hud()
-
+    
     # Récupère la touche pressée
     key = g.recupererTouche()
 
