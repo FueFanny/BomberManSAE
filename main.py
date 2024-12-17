@@ -4,7 +4,8 @@ import random
 import math
 
 # ouverture de fenêtre
-g = ouvrirFenetre(800, 800)
+L,H = 800,800
+g = ouvrirFenetre(L, H)
 
 # un mur (M)
 # une colonne (C)
@@ -107,17 +108,18 @@ def readmap1():
     for col in range(0, len(map1) - 3):
         mp = map1[col + 3]
         print(mp)
+        BI = len(mp)-2
         for lig in range(0, len(mp)):
             if mp[lig] == "C":
-                Block.Colonne(lig, col, 20)
+                Block.Colonne(lig, col, L//BI)
             elif mp[lig] == "M":
-                Block.Mur(lig, col, 20)
+                Block.Mur(lig, col, L//BI)
             elif mp[lig] == "E":
-                g.dessinerRectangle(lig * 20, col * 20, 20, 20, "DarkViolet")
+                g.dessinerRectangle(lig * L//BI, col * H//BI, L//BI, H//BI, "DarkViolet")
             elif mp[lig] == " ":
-                Block.Sol(lig, col, 20)
+                Block.Sol(lig, col, L//BI)
             elif mp[lig] == "P":
-                player = Player(lig, col, 20)
+                player = Player(lig, col, L//BI)
                 players.append(player)
                 player.draw()
     return players, map1[3:]  # Retourne aussi les données de la carte
